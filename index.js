@@ -21,7 +21,7 @@ server.use(plugins.inlineCss);
 server.use(plugins.urlInParam);
 /**/
 // server.use(prerender.inMemoryHtmlCache());
-if (process.env.AWS_ACCESS_KEY_IDvar) {
+if (process.env.AWS_ACCESS_KEY_ID) {
 	console.log("Using s3HtmlCache")
     server.use(prerender.s3HtmlCache());
 } else {
