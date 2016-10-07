@@ -16,7 +16,13 @@ server.use(prerender.removeScriptTags());
 server.use(prerender.httpHeaders());
 /**/
 var plugins = require('prerender-contrib');
-server.use(plugins.baseHref);
+
+if (process.env.BASE_HREF=="true") {
+	console.log("Using baseHref")
+	server.use(plugins.baseHref);
+} else {
+	console.log("Not using baseHref")
+}
 server.use(plugins.inlineCss);
 server.use(plugins.urlInParam);
 /**/
