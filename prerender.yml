@@ -1,0 +1,82 @@
+# Usage (to create or update):
+# 
+# gcloud init
+# gcloud auth login
+# gcloud components install kubectl
+# gcloud container clusters get-credentials [cluster-name] --project [Project ID]
+## (http://kubernetes.io/docs/user-guide/managing-deployments/#kubectl-apply)
+# kubectl apply -f .
+#
+#
+#
+# inspired from
+# https://github.com/kubernetes/kubernetes/blob/d4251b2a259ad3b185e13e218b13634d627e0274/examples/guestbook/all-in-one/guestbook-all-in-one.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prerender
+  labels:
+    app: prerender
+    tier: backend
+    role: master
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 37654
+    targetPort: 3000
+  type: LoadBalancer
+  selector:
+    app: prerender
+    tier: backend
+    role: master
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: prerender-deployment
+  # these labels can be applied automatically
+  # from the labels in the pod template if not set
+  # labels:
+  #   app: redis
+  #   role: master
+  #   tier: backend
+spec:
+  # this replicas value is default
+  # modify it according to your case
+  replicas: 5
+  # selector can be applied automatically
+  # from the labels in the pod template if not set
+  # selector:
+  #   matchLabels:
+  #     app: guestbook
+  #     role: master
+  #     tier: backend
+  template:
+    metadata:
+      labels:
+        app: prerender
+        role: master
+        tier: backend
+    spec:
+      containers:
+      - name: master
+        image: smarp/prerender:latest
+        resources:
+          requests:
+            cpu: 200m
+            memory: 100Mi
+        ports:
+        - containerPort: 3000
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: prerender-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: prerender-deployment
+  minReplicas: 4
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 80
